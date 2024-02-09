@@ -249,7 +249,7 @@ int main()
 			// pose = ....
 			pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
 			ndt.setInputTarget(mapCloud);
-			Eigen::Matrix4d transform_mat = NDT(ndt, cloudFiltered, pose, iterations = 10);
+			Eigen::Matrix4d transform_mat = NDT(ndt, cloudFiltered, pose, int iterations = 30);
 			pose = getPose(transform_mat);
 			// TODO: Transform scan so it aligns with ego's actual pose and render that scan
 			PointCloudT::Ptr Cor_Scan(new PointCloudT);
