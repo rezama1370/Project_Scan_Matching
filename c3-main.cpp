@@ -240,7 +240,7 @@ int main()
 
 			new_scan = true;
 			// TODO: (Filter scan using voxel filter)
-			plc::VoxelGrid<PointT> Vox_filter;
+			pcl::VoxelGrid<PointT> Vox_filter;
 			Vox_filter.setInputCloud(scanCloud);
 			Vox_filter.setLeafSize(0.1, 0.1, 0.1);
 			typename pcl::PointCloud<PointT>::Ptr cloudFiltered(new pcl::PointCloud<PointT>);
