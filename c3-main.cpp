@@ -116,7 +116,8 @@ Eigen::Matrix4d NDT(PointCloudT::Ptr source, PointCloudT::Ptr mapCloud, Pose sta
 	pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
 	ndt.setInputTarget(mapCloud);
 	ndt.setResolution(1);
-	ndt.setTransformationEpsilon(0.0000001);
+	ndt.setStepSize(1);
+	ndt.setTransformationEpsilon(0.001);
 	Eigen::Matrix4d transformation_matrix = Eigen::Matrix4d::Identity();
 
 	pcl::console::TicToc time;
