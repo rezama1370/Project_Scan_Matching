@@ -133,6 +133,7 @@ Eigen::Matrix4d NDT(PointCloudT::Ptr source, PointCloudT::Ptr mapCloud, Pose sta
 	ndt.setInputSource(source);
 	pcl::PointCloud<pcl::PointXYZ>::Ptr NDT_Mat(new pcl::PointCloud<pcl::PointXYZ>);
 	ndt.align(*NDT_Mat, init_Mat);
+	cout << "NDT has converged: " << ndt.hasConverged() << " score: " << ndt.getFitnessScore() << " time: " << time.toc() << " ms" << endl;
 	transformation_matrix = ndt.getFinalTransformation().cast<double>();
 	return transformation_matrix;
 }
@@ -259,7 +260,7 @@ int main()
 			Vox_filter.filter(*cloudFiltered);
 			// TODO: Find pose transform by using ICP or NDT matching
 			// pose = ....
-			int iterations = 50;
+			int iterations = 20;
 			Eigen::Matrix4d transform_mat = NDT(cloudFiltered, mapCloud, pose, iterations);
 			pose = getPose(transform_mat);
 			// TODO: Transform scan so it aligns with ego's actual pose and render that scan
