@@ -300,7 +300,7 @@ int main()
 			Vox_filter.filter(*cloudFiltered);
 			// TODO: Find pose transform by using ICP or NDT matching
 			// pose = ....
-			int iterations = 8;
+			int iterations = 4;
 			// Eigen::Matrix4d transform_mat = NDT(cloudFiltered, mapCloud, pose, iterations);
 			Eigen::Matrix4d transform_mat = ICP(mapCloud, cloudFiltered, pose, iterations);
 			pose = getPose(transform_mat);
