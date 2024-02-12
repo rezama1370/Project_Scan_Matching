@@ -111,9 +111,12 @@ void drawCar(Pose pose, int num, Color color, double alpha, pcl::visualization::
 	renderBox(viewer, box, num, color, alpha);
 }
 // ////////////// NDT
-Eigen::Matrix4d NDT(pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt, PointCloudT::Ptr source, Pose startingPose, int iterations)
+Eigen::Matrix4d NDT(PointCloudT::Ptr source, PointCloudT::Ptr mapCloud, Pose startingPose, int iterations)
 {
-
+	pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
+	ndt.setInputTarget(mapCloud);
+	ndt.setResolution(1);
+	ndt.setTransformationEpsilon(0.000001);
 	Eigen::Matrix4d transformation_matrix = Eigen::Matrix4d::Identity();
 
 	pcl::console::TicToc time;
@@ -136,6 +139,7 @@ Eigen::Matrix4d NDT(pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointX
 
 int main()
 {
+	int scan_num = 0;
 
 	auto client = cc::Client("localhost", 2000);
 	client.SetTimeout(2s);
@@ -238,6 +242,14 @@ int main()
 		if (!new_scan)
 		{
 
+			if (scan_num == 0)
+			{
+
+				pose.position = truePose.position;
+				pose.rotation = truePose.rotation;
+			}
+			scan_num += 1;
+
 			new_scan = true;
 			// TODO: (Filter scan using voxel filter)
 			pcl::VoxelGrid<PointT> Vox_filter;
@@ -247,10 +259,8 @@ int main()
 			Vox_filter.filter(*cloudFiltered);
 			// TODO: Find pose transform by using ICP or NDT matching
 			// pose = ....
-			pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
-			ndt.setInputTarget(mapCloud);
 			int iterations = 30;
-			Eigen::Matrix4d transform_mat = NDT(ndt, cloudFiltered, pose, iterations);
+			Eigen::Matrix4d transform_mat = NDT(cloudFiltered, mapCloud, pose, iterations);
 			pose = getPose(transform_mat);
 			// TODO: Transform scan so it aligns with ego's actual pose and render that scan
 			PointCloudT::Ptr Cor_Scan(new PointCloudT);
