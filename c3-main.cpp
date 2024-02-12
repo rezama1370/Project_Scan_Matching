@@ -302,6 +302,7 @@ int main()
 			// pose = ....
 			int iterations = 3;
 			// Eigen::Matrix4d transform_mat = NDT(cloudFiltered, mapCloud, pose, iterations);
+			pose = Pose(Point(vehicle->GetTransform().location.x, vehicle->GetTransform().location.y, vehicle->GetTransform().location.z), Rotate(vehicle->GetTransform().rotation.yaw * pi/180, vehicle->GetTransform().rotation.pitch * pi/180, vehicle->GetTransform().rotation.roll * pi/180)) - poseRef;
 			Eigen::Matrix4d transform_mat = ICP(mapCloud, cloudFiltered, pose, iterations);
 			pose = getPose(transform_mat);
 			// TODO: Transform scan so it aligns with ego's actual pose and render that scan
