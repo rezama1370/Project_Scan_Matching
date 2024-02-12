@@ -116,7 +116,7 @@ Eigen::Matrix4d NDT(PointCloudT::Ptr source, PointCloudT::Ptr mapCloud, Pose sta
 	pcl::NormalDistributionsTransform<pcl::PointXYZ, pcl::PointXYZ> ndt;
 	ndt.setInputTarget(mapCloud);
 	ndt.setResolution(1);
-	ndt.setTransformationEpsilon(0.000001);
+	ndt.setTransformationEpsilon(0.0000001);
 	Eigen::Matrix4d transformation_matrix = Eigen::Matrix4d::Identity();
 
 	pcl::console::TicToc time;
@@ -254,12 +254,12 @@ int main()
 			// TODO: (Filter scan using voxel filter)
 			pcl::VoxelGrid<PointT> Vox_filter;
 			Vox_filter.setInputCloud(scanCloud);
-			Vox_filter.setLeafSize(0.1, 0.1, 0.1);
+			Vox_filter.setLeafSize(0.5, 0.5, 0.5);
 			typename pcl::PointCloud<PointT>::Ptr cloudFiltered(new pcl::PointCloud<PointT>);
 			Vox_filter.filter(*cloudFiltered);
 			// TODO: Find pose transform by using ICP or NDT matching
 			// pose = ....
-			int iterations = 30;
+			int iterations = 50;
 			Eigen::Matrix4d transform_mat = NDT(cloudFiltered, mapCloud, pose, iterations);
 			pose = getPose(transform_mat);
 			// TODO: Transform scan so it aligns with ego's actual pose and render that scan
