@@ -232,7 +232,7 @@ int main(int argc, char *argv[]) {
 			auto scan = boost::static_pointer_cast<csd::LidarMeasurement>(data);
 			for (auto detection : *scan){
 				if((detection.x*detection.x + detection.y*detection.y + detection.z*detection.z) > 8.0){ // Don't include points touching ego
-					pclCloud.points.push_back(PointT(detection.x, detection.y, detection.z));
+					pclCloud.points.push_back(PointT(-detection.y, detection.x, detection.z));
 				}
 			}
 			if(pclCloud.points.size() > 5000) { //5000){ // CANDO: Can modify this value to get different scan resolutions
