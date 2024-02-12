@@ -138,6 +138,41 @@ Eigen::Matrix4d NDT(PointCloudT::Ptr source, PointCloudT::Ptr mapCloud, Pose sta
 	transformation_matrix = ndt.getFinalTransformation().cast<double>();
 	return transformation_matrix;
 }
+//////// ICP
+Eigen::Matrix4d ICP(PointCloudT::Ptr target, PointCloudT::Ptr source, Pose startingPose)
+{
+	Eigen::Matrix4d transformation_matrix = Eigen::Matrix4d::Identity();
+	Eigen::Matrix4d initTransform = transform3D(startingPose.rotation.yaw, startingPose.rotation.pitch, startingPose.rotation.roll, startingPose.position.x, startingPose.position.y, startingPose.position.z);
+	PointCloudT::Ptr transformSource(new PointCloudT);
+	pcl::transformPointCloud(*source, *transformSource, initTransform);
+
+	pcl::console::TicToc time;
+	time.tic();
+	pcl::IterativeClosestPoint<PointT, PointT> icp;
+	icp.setTransformationEpsilon(1e-8); // 0.000001);
+	int iterations = 60;				// 50; //25; //4; //3;
+	icp.setMaximumIterations(iterations);
+	icp.setInputSource(transformSource);
+	icp.setInputTarget(target);
+	// icp.setMaxCorrespondenceDistance(20); //15); //8); //2);
+	// icp.setTransformationEpsilon(0.001);
+	// icp.setEuclideanFitnessEpsilon(0.00001); //.05);
+	// icp.setRANSACOutlierRejectionThreshold (10);
+
+	PointCloudT::Ptr cloud_icp(new PointCloudT); // ICP output point cloud
+	icp.align(*cloud_icp);
+	cout << "ICP has converged: " << icp.hasConverged() << " score: " << icp.getFitnessScore() << " time: " << time.toc() << " ms" << endl;
+
+	if (icp.hasConverged())
+	{
+		transformation_matrix = icp.getFinalTransformation().cast<double>();
+		transformation_matrix = transformation_matrix * initTransform;
+		return transformation_matrix;
+	}
+	else
+		cout << "WARNING: ICP did not converge" << endl;
+	return transformation_matrix;
+}
 
 int main()
 {
@@ -262,7 +297,8 @@ int main()
 			// TODO: Find pose transform by using ICP or NDT matching
 			// pose = ....
 			int iterations = 20;
-			Eigen::Matrix4d transform_mat = NDT(cloudFiltered, mapCloud, pose, iterations);
+			// Eigen::Matrix4d transform_mat = NDT(cloudFiltered, mapCloud, pose, iterations);
+			Eigen::Matrix4d transform_mat = ICP(mapCloud, cloudFiltered, pose);
 			pose = getPose(transform_mat);
 			// TODO: Transform scan so it aligns with ego's actual pose and render that scan
 			PointCloudT::Ptr Cor_Scan(new PointCloudT);
